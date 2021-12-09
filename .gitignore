@@ -8,3 +8,5 @@
 */out/*
 !*/out/.placeholder
 !*/out/.empty
+_targets/*
+*.DS_store
