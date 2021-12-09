@@ -5,3 +5,6 @@
 
 # Specific files/dirs to ignore for this pipeline
 */tmp/*
+*/out/*
+!*/out/.placeholder
+!*/out/.empty
