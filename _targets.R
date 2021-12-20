@@ -5,7 +5,12 @@ suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(dplyr))
 
 options(tidyverse.quiet = TRUE)
-tar_option_set(packages = c("tidyverse", "dataRetrieval", "urbnmapr", "rnaturalearth", "cowplot", "lubridate"))
+tar_option_set(packages = c("tidyverse",
+                            "dataRetrieval",
+                            "urbnmapr",
+                            "rnaturalearth",
+                            "cowplot",
+                            "lubridate"))
 
 # Load functions needed by targets below
 source("1_fetch/src/find_oldest_sites.R")
@@ -24,8 +29,10 @@ list(
   tar_target(oldest_active_sites, find_oldest_sites(states,
                                                     parameter)),
 
-  # static branching with tar_map()
+  ## static branching with tar_map()
   tar_map(
+    ## Use state as suffix in branch target naming
+    names = state_abb,
     ## task names passed into tar_map() via arg. 'values='
     values = tibble(state_abb = states) %>%
       mutate(state_plot_files = sprintf("3_visualize/out/timeseries_%s.png", state_abb)),
@@ -41,10 +48,9 @@ list(
 
     tar_target(timeseries_png, plot_site_data(out_file = state_plot_files,
                                               site_data = nwis_data,
-                                              parameter = parameter)
-    ),
-
-    names = state_abb
+                                              parameter = parameter),
+               format = "file"
+    )
   ),
 
   # Map oldest sites
