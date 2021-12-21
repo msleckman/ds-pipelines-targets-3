@@ -12,3 +12,11 @@ tally_site_obs <- function(site_data) {
   # Apply (computation in length(which(!is.na()))) & COMBINE (summarize)
     summarize(NumObs = length(which(!is.na(Value))), .groups = "keep")
 }
+
+## Combine tallies
+combine_obs_tallies <- function(...){
+
+  combined_obs_tally <- rbind(...)
+
+  return(combined_obs_tally)
+}
