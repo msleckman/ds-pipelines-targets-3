@@ -10,7 +10,11 @@ tar_option_set(packages = c("tidyverse",
                             "urbnmapr",
                             "rnaturalearth",
                             "cowplot",
-                            "lubridate"))
+                            "lubridate",
+                            'leaflet',
+                            'leafpop',
+                            'htmlwidgets')
+               )
 
 # Load functions needed by targets below
 source("1_fetch/src/find_oldest_sites.R")
@@ -27,7 +31,7 @@ source('3_visualize/src/map_timeseries.R')
 dir.create('3_visualize/log/', showWarnings = F)
 
 # Configuration
-states <- c('WI','MN','MI','IL', 'IA')
+states <- c('WI','MN','MI','IL', 'IN', 'IA')
 parameter <- c('00060')
 
 ## static branching with tar_map()
@@ -81,6 +85,13 @@ list(
              map_sites("3_visualize/out/site_map.png",
                        oldest_active_sites),
     format = "file"
-  )
+  ),
+
+  tar_target(timeseries_map_html,
+             map_timeseries(site_info = oldest_active_sites,
+                            plot_info_csv = summary_state_timeseries_csv,
+                            out_file = '3_visualize/out/timeseries_map.html'),
+             format = 'file')
+
 
 )
