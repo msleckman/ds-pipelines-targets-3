@@ -17,8 +17,14 @@ source("1_fetch/src/find_oldest_sites.R")
 source("1_fetch/src/get_site_data.R")
 source("3_visualize/src/map_sites.R")
 source("2_process/src/tally_site_obs.R")
+source("2_process/src/summarize_targets.R")
 source("3_visualize/src/plot_site_data.R")
 source("3_visualize/src/plot_data_coverage.R")
+source('3_visualize/src/map_timeseries.R')
+
+
+# create log folder
+dir.create('3_visualize/log/', showWarnings = F)
 
 # Configuration
 states <- c('WI','MN','MI','IL', 'IA')
@@ -56,7 +62,14 @@ list(
 
   mapped_by_state_targets, # put tally target as input, check if correct
 
-  tar_combine(obs_tallies, combine_obs_tallies(mapped_by_state_targets$tally)),
+  tar_combine(obs_tallies, mapped_by_state_targets$tally, command = combine_obs_tallies(!!!.x)),
+
+  tar_combine(
+    summary_state_timeseries_csv,
+    mapped_by_state_targets$timeseries_png,
+    command = summarize_targets('3_visualize/log/summary_state_timeseries.csv', !!!.x),
+    format="file"
+  ),
 
   tar_target(data_coverage_png, plot_data_coverage(oldest_site_tallies = obs_tallies,
                                                    out_file = "3_visualize/out/data_coverage.png",
