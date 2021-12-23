@@ -10,3 +10,6 @@
 !*/out/.empty
 _targets/*
 *.DS_store
+*.csv
+*.html
+*.png
