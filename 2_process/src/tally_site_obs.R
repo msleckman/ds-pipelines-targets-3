@@ -1,22 +1,15 @@
+
 # Compute number of observations per year
 # packages: lubridate, tidyverse
 tally_site_obs <- function(site_data) {
   message(sprintf('  Tallying data for %s-%s', site_data$State[1], site_data$Site[1]))
 
   site_data %>%
-  ## SPLIT
-      mutate(Year = year(Date)) %>%
+    ## SPLIT
+    mutate(Year = year(Date)) %>%
     # group by Site and State just to retain those columns, since we're already
     # only looking at just one site worth of data
     group_by(Site, State, Year) %>%
-  # Apply (computation in length(which(!is.na()))) & COMBINE (summarize)
+    # Apply (computation in length(which(!is.na()))) & COMBINE (summarize)
     summarize(NumObs = length(which(!is.na(Value))), .groups = "keep")
-}
-
-## Combine tallies
-combine_obs_tallies <- function(...){
-
-  combined_obs_tally <- rbind(...)
-
-  return(combined_obs_tally)
 }
