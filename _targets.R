@@ -39,9 +39,9 @@ dir.create('3_visualize/log/', showWarnings = F)
 states <- c('AL','AZ','AR','CA','CO','CT','DE','DC','FL','GA','ID','IL','IN','IA',
             'KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH',
             'NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX',
-            'UT','VT','VA','WA','WV','WI','WY','AK','HI','GU','PR')
+            'UT','VA','WA','WV','WI','WY','AK','HI','PR')
 
-parameter <- c('00060')
+parameter <- c('00010')
 
 ## List of Targets
 list(
