@@ -29,7 +29,7 @@ source("3_visualize/src/plot_site_data.R")
 source("3_visualize/src/plot_data_coverage.R")
 source('3_visualize/src/map_timeseries.R')
 
-## create log folder
+## Create log folder
 dir.create('3_visualize/log/', showWarnings = F)
 
 ## Configuration - define global vars
@@ -44,18 +44,19 @@ states <- c('AL','AZ','AR','CA','CO','CT','DE','DC','FL','GA','ID','IL','IN','IA
 parameter <- c('00060')
 
 ## List of Targets
+
 list(
-  # Identify oldest sites in NWIS data
+  # Fetch - Identify oldest sites in NWIS data
   tar_target(oldest_active_sites, find_oldest_sites(states, parameter)),
 
-  # Subset to states in selected states list
+  # Fetch - Subset to states in selected states list
   tar_target(nwis_inventory,
              oldest_active_sites %>%
                group_by(state_cd) %>%
                tar_group(),
              iteration = "group"),
 
-  # Download data for given site
+  # Fetch - Download data for given site
   tar_target(nwis_data, retry::retry(get_site_data(nwis_inventory,
                                                    nwis_inventory$state_cd,
                                                    parameter), when = "Ugh, the internet data transfer failed!",
@@ -63,41 +64,42 @@ list(
              pattern = map(nwis_inventory)
              ),
 
-  # Tally - Clean and summarize data for each state
+  # Process - Tally (clean and summarize) data for each state
   tar_target(tally, tally_site_obs(nwis_data), pattern = map(nwis_data)),
 
-  # Target 4 - Produce timeseries plot for each state
+  # Vis - Produce timeseries plots for each state
   tar_target(timeseries_png, plot_site_data(out_file = sprintf("3_visualize/out/timeseries_%s.png", unique(nwis_data$State)),
                                             site_data = nwis_data,
                                             parameter = parameter),
              format = "file",
              pattern = map(nwis_data)),
 
-  # Export log file of timeseries outputs
-  tar_target(summary_state_timeseries_csv,
-    command = summarize_targets('3_visualize/log/summary_state_timeseries.csv',
-                                names(timeseries_png)),
-    format="file"
-  ),
 
-  # Plot data coverage graphic
+  # Vis - Plot data coverage graphic
   tar_target(data_coverage_png, plot_data_coverage(oldest_site_tallies = tally,
                                                    out_file = "3_visualize/out/data_coverage.png",
                                                    parameter = parameter),
              format = 'file'),
 
-  # Map selected oldest sites
+  # Vis - Map selected oldest sites
   tar_target(site_map_png,
              map_sites("3_visualize/out/site_map.png",
                        oldest_active_sites),
     format = "file"
   ),
 
-  # Map selected oldest sites on a interactive html
+  # Vis - Map selected oldest sites on a interactive html
   tar_target(timeseries_map_html,
              map_timeseries(site_info = oldest_active_sites,
                             plot_info_csv = summary_state_timeseries_csv,
                             out_file = '3_visualize/out/timeseries_map.html'),
-             format = 'file')
+             format = 'file'),
+
+  # Vis - Export log file of timeseries outputs
+  tar_target(summary_state_timeseries_csv,
+             command = summarize_targets('3_visualize/log/summary_state_timeseries.csv',
+                                         names(timeseries_png)),
+             format="file"
+  )
 
 )
