@@ -16,10 +16,9 @@ tar_option_set(packages = c("tidyverse",
                             "lubridate",
                             'leaflet',
                             'leafpop',
-                            'htmlwidgets')
-               )
+                            'htmlwidgets'))
 
-# Load functions needed by targets below
+## Load functions needed by targets below
 source("1_fetch/src/find_oldest_sites.R")
 source("1_fetch/src/get_site_data.R")
 source("3_visualize/src/map_sites.R")
@@ -50,17 +49,17 @@ list(
   tar_target(oldest_active_sites, find_oldest_sites(states, parameter)),
 
   # Fetch - Subset to states in selected states list
-  tar_target(nwis_inventory,
-             oldest_active_sites %>%
+  tar_target(nwis_inventory, oldest_active_sites %>%
                group_by(state_cd) %>%
                tar_group(),
              iteration = "group"),
 
   # Fetch - Download data for given site
-  tar_target(nwis_data, retry::retry(get_site_data(nwis_inventory,
-                                                   nwis_inventory$state_cd,
-                                                   parameter), when = "Ugh, the internet data transfer failed!",
-                                     max_tries = 30),
+  tar_target(nwis_data,
+             retry(
+               get_site_data(nwis_inventory, nwis_inventory$state_cd, parameter),
+               when = "Ugh, the internet data transfer failed!",
+               max_tries = 30),
              pattern = map(nwis_inventory)
              ),
 
@@ -68,9 +67,10 @@ list(
   tar_target(tally, tally_site_obs(nwis_data), pattern = map(nwis_data)),
 
   # Vis - Produce timeseries plots for each state
-  tar_target(timeseries_png, plot_site_data(out_file = sprintf("3_visualize/out/timeseries_%s.png", unique(nwis_data$State)),
-                                            site_data = nwis_data,
-                                            parameter = parameter),
+  tar_target(timeseries_png,
+             plot_site_data(out_file = sprintf("3_visualize/out/timeseries_%s.png", unique(nwis_data$State)),
+                            site_data = nwis_data,
+                            parameter = parameter),
              format = "file",
              pattern = map(nwis_data)),
 
